@@ -58,11 +58,11 @@ Aplikasi ini mengekspos beberapa endpoint API RESTful. Anda dapat menggunakan al
 
 ### Manajemen Penyewa
 
-- `POST /api/tenants`: Membuat penyewa baru.
-- `GET /api/tenants`: Mendapatkan semua penyewa.
-- `GET /api/tenants/{id}`: Mendapatkan penyewa berdasarkan ID.
-- `PUT /api/tenants/{id}`: Memperbarui penyewa yang sudah ada.
-- `DELETE /api/tenants/{id}`: Menghapus penyewa berdasarkan ID.
+- `POST /api/v1/tenants`: Membuat penyewa baru.
+- `GET /api/v1/tenants`: Mendapatkan semua penyewa.
+- `GET /api/v1/tenants/{id}`: Mendapatkan penyewa berdasarkan ID.
+- `PUT /api/v1/tenants/{id}`: Memperbarui penyewa yang sudah ada.
+- `DELETE /api/v1/tenants/{id}`: Menghapus penyewa berdasarkan ID.
 
 ## Struktur Proyek
 
