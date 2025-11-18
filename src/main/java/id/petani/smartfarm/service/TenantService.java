@@ -18,8 +18,14 @@ public class TenantService {
     @Autowired
     private TenantRepository tenantRepository;
 
-    public List<TenantResponseDTO> getAllTenants() {
-        return tenantRepository.findAll().stream()
+    public List<TenantResponseDTO> getAllTenants(Boolean isActive) {
+        List<Tenant> tenants;
+        if (isActive != null) {
+            tenants = tenantRepository.findByIsActiveOrderByIdAsc(isActive);
+        } else {
+            tenants = tenantRepository.findAllByOrderByIdAsc();
+        }
+        return tenants.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }

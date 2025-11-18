@@ -19,8 +19,8 @@ public class TenantController {
     private TenantService tenantService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<TenantResponseDTO>>> getAllTenants() {
-        List<TenantResponseDTO> tenants = tenantService.getAllTenants();
+    public ResponseEntity<ApiResponse<List<TenantResponseDTO>>> getAllTenants(@RequestParam(required = false) Boolean isActive) {
+        List<TenantResponseDTO> tenants = tenantService.getAllTenants(isActive);
         return ResponseEntity.ok(ApiResponse.success("Tenants retrieved successfully", tenants));
     }
 
