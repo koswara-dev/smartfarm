@@ -6,8 +6,10 @@ import id.petani.smartfarm.dto.TenantResponseDTO;
 import id.petani.smartfarm.service.TenantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -30,14 +32,14 @@ public class TenantController {
         return ResponseEntity.ok(ApiResponse.success("Tenant retrieved successfully", tenant));
     }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<TenantResponseDTO>> createTenant(@RequestBody TenantRequestDTO tenantRequestDTO) {
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<ApiResponse<TenantResponseDTO>> createTenant(@Valid @ModelAttribute TenantRequestDTO tenantRequestDTO) {
         TenantResponseDTO createdTenant = tenantService.createTenant(tenantRequestDTO);
         return new ResponseEntity<>(ApiResponse.success("Tenant created successfully", createdTenant), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<TenantResponseDTO>> updateTenant(@PathVariable Long id, @RequestBody TenantRequestDTO tenantRequestDTO) {
+    @PutMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<ApiResponse<TenantResponseDTO>> updateTenant(@PathVariable Long id, @Valid @ModelAttribute TenantRequestDTO tenantRequestDTO) {
         TenantResponseDTO updatedTenant = tenantService.updateTenant(id, tenantRequestDTO);
         return ResponseEntity.ok(ApiResponse.success("Tenant updated successfully", updatedTenant));
     }

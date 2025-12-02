@@ -14,6 +14,7 @@ public class TenantResponseDTO {
     private String domain;
     private String subdomain;
     private String phoneNumber;
+    private String logoUrl; // New field for logo URL
     private boolean isActive;
     private java.time.LocalDateTime createdAt;
     private java.time.LocalDateTime updatedAt;

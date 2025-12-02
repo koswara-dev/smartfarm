@@ -26,6 +26,7 @@ public class Tenant {
     private String domain;
     private String subdomain;
     private String phoneNumber;
+    private String logoUrl; // New field for logo URL
     private boolean isActive;
 
     @CreationTimestamp

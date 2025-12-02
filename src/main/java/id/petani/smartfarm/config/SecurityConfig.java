@@ -13,6 +13,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import id.petani.smartfarm.service.storage.StorageService; // Import StorageService
+
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,11 +28,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry; // Import ResourceHandlerRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer; // Import WebMvcConfigurer
+import org.springframework.beans.factory.annotation.Autowired; // Import Autowired
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer { // Implement WebMvcConfigurer
+
+    @Autowired
+    private StorageService storageService; // Autowire StorageService
 
     @Bean
     public UserDetailsService userDetailsService(UserService userService) { // UserService is already a @Service and implements UserDetailsService
@@ -56,7 +64,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/register", "/uploads/**").permitAll() // Permit access to /uploads/**
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/users/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/api/v1/**").hasAnyRole("ADMIN", "STAFF")
@@ -84,5 +92,11 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // Apply CORS to all paths
         return source;
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:" + storageService.getRootLocation().toAbsolutePath().toString() + "/");
     }
 }
