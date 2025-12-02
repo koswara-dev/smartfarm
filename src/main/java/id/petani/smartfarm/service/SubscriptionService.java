@@ -14,6 +14,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDate;
+import java.util.List;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
@@ -27,6 +32,11 @@ public class SubscriptionService {
 
     @Autowired
     private SubscriptionPlanRepository subscriptionPlanRepository;
+
+    @Autowired
+    private EmailService emailService;
+
+    private static final Logger logger = LoggerFactory.getLogger(SubscriptionService.class);
 
     public Page<SubscriptionResponseDTO> getAllSubscriptions(Boolean status, String billingCycle, Long subscriptionPlanId, Pageable pageable) {
         Page<Subscription> subscriptions;
@@ -120,5 +130,35 @@ public class SubscriptionService {
         dto.setPriceYearly(subscription.getSubscriptionPlan().getPriceYearly().doubleValue());
 
         return dto;
+    }
+
+    @Scheduled(cron = "0 0 9 * * *") // Runs every day at 9 AM
+    public void sendSubscriptionReminders() {
+        int daysBeforeExpiry = 7; // Remind 7 days before expiry
+        logger.info("Running scheduled task to send subscription reminders for subscriptions expiring in {} days.", daysBeforeExpiry);
+        LocalDate reminderDate = LocalDate.now().plusDays(daysBeforeExpiry);
+        List<Subscription> expiringSubscriptions = subscriptionRepository.findByEndDate(reminderDate);
+
+        if (expiringSubscriptions.isEmpty()) {
+            logger.info("No subscriptions found expiring in {} days.", daysBeforeExpiry);
+            return;
+        }
+
+        for (Subscription subscription : expiringSubscriptions) {
+            String recipientEmail = subscription.getTenant().getEmail(); // Assuming Tenant has an email field
+            String subject = "Subscription Reminder: Your SmartFarm subscription is expiring soon!";
+            String text = String.format("Dear %s,\n\n" +
+                            "This is a friendly reminder that your SmartFarm subscription for plan '%s' " +
+                            "is set to expire on %s.\n\n" +
+                            "Please renew your subscription to continue enjoying our services.\n\n" +
+                            "Thank you,\nSmartFarm Team",
+                    subscription.getTenant().getName(),
+                    subscription.getSubscriptionPlan().getName(),
+                    subscription.getEndDate().toString());
+            emailService.sendSimpleMessage(recipientEmail, subject, text);
+            logger.info("Sent reminder email to {} for subscription plan '{}' expiring on {}.",
+                    recipientEmail, subscription.getSubscriptionPlan().getName(), subscription.getEndDate());
+        }
+        logger.info("Finished sending {} subscription reminders.", expiringSubscriptions.size());
     }
 }
