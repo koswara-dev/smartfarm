@@ -14,6 +14,10 @@ import jakarta.validation.constraints.NotNull;
 @AllArgsConstructor
 public class TenantRequestDTO {
     @NotBlank(message = "Name cannot be empty")
+    @Pattern(
+        regexp = "^[a-zA-Z0-9 .-_]{3,100}$",
+        message = "Invalid characters in name"
+    )
     private String name;
 
     @NotBlank(message = "Email cannot be empty")

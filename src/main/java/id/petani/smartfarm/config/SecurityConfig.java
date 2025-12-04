@@ -4,7 +4,7 @@ import id.petani.smartfarm.security.JwtAuthFilter;
 import id.petani.smartfarm.service.UserService;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -85,7 +85,7 @@ public class SecurityConfig implements WebMvcConfigurer { // Implement WebMvcCon
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:5173")); // Allow specific origin
+        configuration.setAllowedOrigins(List.of("http://localhost:5173","http://localhost:8083"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allow common methods
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept")); // Allow specific headers
         configuration.setAllowCredentials(true); // Allow credentials (cookies, authorization headers)

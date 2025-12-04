@@ -7,8 +7,10 @@ import id.petani.smartfarm.model.Tenant;
 import id.petani.smartfarm.model.User;
 import id.petani.smartfarm.repository.TenantRepository;
 import id.petani.smartfarm.repository.UserRepository;
+import id.petani.smartfarm.util.EncryptionUtil; // Import EncryptionUtil
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,7 +18,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -28,6 +32,9 @@ public class UserService implements UserDetailsService {
     private TenantRepository tenantRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired // Autowire EncryptionUtil
+    private EncryptionUtil encryptionUtil;
 
     public UserService(UserRepository userRepository, TenantRepository tenantRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -54,7 +61,24 @@ public class UserService implements UserDetailsService {
         } else {
             users = userRepository.findAll(pageable);
         }
-        return users.map(this::convertToDto);
+
+        List<UserResponseDTO> encryptedUserDTOs = users.stream()
+                .map(user -> {
+                    UserResponseDTO dto = convertToDto(user);
+                    try {
+                        // Encrypt sensitive fields, for example, email and fullName
+                        dto.setEmail(encryptionUtil.encrypt(dto.getEmail()));
+                        dto.setFullName(encryptionUtil.encrypt(dto.getFullName()));
+                    } catch (Exception e) {
+                        // Log the error, or throw a custom exception
+                        System.err.println("Error encrypting user data: " + e.getMessage());
+                        // Depending on requirements, you might want to return null, or original DTO, or rethrow
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(encryptedUserDTOs, pageable, users.getTotalElements());
     }
 
     public UserResponseDTO getUserById(Long id) {
