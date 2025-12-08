@@ -64,7 +64,7 @@ public class SecurityConfig implements WebMvcConfigurer { // Implement WebMvcCon
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/auth/login", "/api/auth/register", "/uploads/**").permitAll() // Permit access to /uploads/**
+                .requestMatchers("/api/auth/login", "/api/auth/register", "/uploads/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Permit access to /uploads/**
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/users/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/api/v1/**").hasAnyRole("ADMIN", "STAFF")
